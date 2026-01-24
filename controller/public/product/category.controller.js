@@ -31,12 +31,16 @@
 const Category = require("../../../model/Category.model");
 
 const asyncHandler = require("express-async-handler");
+
+// Get all Categories 
 const getAllCategories = asyncHandler(async (req, res) => {
     const categories = await Category.find({}).sort({ createdAt: -1 })
     ;
     return res.success("Category Fetched Successfully.", categories);
 });
 
+
+// get category by id
 const getCategoryById = asyncHandler(async (req, res) => {
     const _id = req.body?.id || req.params.id;
     if (!_id) {
@@ -58,4 +62,6 @@ const getCategoryById = asyncHandler(async (req, res) => {
     }
     return res.success("category Fetched Successfully", category);
 });
+
+
 module.exports = { getAllCategories, getCategoryById };

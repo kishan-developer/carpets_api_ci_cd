@@ -1,6 +1,7 @@
 const express = require("express");
 const Coupon = require("../../model/Coupon.model");
 
+// Create Coupon 
 const createCoupon = async (req, res) => {
     // get data from Body ->Code, discount (%),maxAge (in Hour),max usage limit
     const { code, discount, maxAge, maxUsageLimit, status = false } = req.body;
@@ -25,6 +26,8 @@ const createCoupon = async (req, res) => {
     }
 };
 
+
+// Get All Coupons
 const getAllCoupans = async (req, res) => {
     try {
         const coupons = await Coupon.find().sort({ createdAt: -1 });
@@ -34,6 +37,8 @@ const getAllCoupans = async (req, res) => {
         return res.error("Something went wrong while fetching coupons.");
     }
 };
+
+// Update Coupon
 const updateCoupon = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
@@ -56,6 +61,8 @@ const updateCoupon = async (req, res) => {
     }
 };
 
+
+// Delete Coupon
 const deleteCoupon = async (req, res) => {
     const { id } = req.params;
 
@@ -71,7 +78,6 @@ const deleteCoupon = async (req, res) => {
 
 module.exports = {
     createCoupon,
-
     getAllCoupans,
     updateCoupon,
     deleteCoupon,

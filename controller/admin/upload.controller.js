@@ -1,5 +1,5 @@
 
-
+// Upload Image
 const uploadImage = (req, res) => {
   const productName = req.body.name || 'unknown';
   const safeName = productName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');

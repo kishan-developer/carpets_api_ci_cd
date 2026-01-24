@@ -4,7 +4,7 @@
 // const { CATEGORY_ALLOWED_FIELDS } = require("../../constants/constants");
 
 // const createCategory = asyncHandler(async (req, res) => {
-    
+
 //     // get data from body;
 //     const { name, description } = req.body;
 
@@ -85,10 +85,14 @@ const ensureAllCategoryExists = async () => {
     );
 };
 
+// Create Category 
 const createCategory = asyncHandler(async (req, res) => {
+    console.log("Create Category Controller call ");
+    console.log(req.bdoy)
+    const { name, description } = req.body;
+
     await ensureAllCategoryExists();
 
-    const { name, description } = req.body;
     if (!name || !description) {
         return res.error("All fields are required", 400);
     }
@@ -96,6 +100,7 @@ const createCategory = asyncHandler(async (req, res) => {
     const isDuplicate = await Category.findOne({
         name: name.trim().toLowerCase(),
     });
+
     if (isDuplicate) {
         return res.error("Category with this name already exists.", 409);
     }
@@ -108,6 +113,7 @@ const createCategory = asyncHandler(async (req, res) => {
     return res.success("Category Created Successfully", allUpdatedCategories);
 });
 
+// Update Category
 const updateCategory = asyncHandler(async (req, res) => {
     const _id = req.params?.id || req.body?.id;
     if (!_id) {
@@ -143,6 +149,7 @@ const updateCategory = asyncHandler(async (req, res) => {
     return res.success("Category Updated Successfully", allUpdatedCategories);
 });
 
+// Delete Category 
 const deleteCategory = asyncHandler(async (req, res) => {
     await ensureAllCategoryExists();
 
@@ -183,7 +190,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
     await Category.findByIdAndDelete(_id);
     const allCat = await Category.find({});
     return res.success(
-        Category ` deleted successfully. Products moved to 'all'.`,
+        Category` deleted successfully. Products moved to 'all'.`,
         allCat
     );
 });

@@ -55,7 +55,7 @@ const productSchema = new mongoose.Schema(
         },
         assurance: {
             type: String,
-            required: true,
+            required: false,
         },
         hsnCode: {
             type: String,
@@ -79,23 +79,23 @@ const productSchema = new mongoose.Schema(
 
         material: {
             type: String, // e.g., 100% Jute
-            required: true,
+            required: false,
         },
         texture: {
             type: String, // e.g., Soft, Coarse
-            required: true,
+            required: false,
         },
         pileThickness: {
             type: String, // e.g., 2/7 inch
-            required: true,
+            required: false,
         },
         size: {
             type: String, // e.g., 5x8 ft
-            required: true,
+            required: false,
         },
         style: {
             type: String,
-            required: true,
+            required: false,
         }
     }, // Store review IDs for each product
     { timestamps: true }

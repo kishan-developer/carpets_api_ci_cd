@@ -83,6 +83,7 @@
 // Admin Offer Controller 
 const Offer = require("../../model/Offer.model");
 
+// Create Offer 
 const createOffer = async (req, res) => {
     const { discount, maxAge, maxUsageLimit, status = false } = req.body; // get required body data
 
@@ -113,6 +114,7 @@ const createOffer = async (req, res) => {
     }
 };
 
+// Update Offers
 const updateOffer = async (req, res) => {
     const updateData = req.body;
     const { id } = req.params;
@@ -155,6 +157,7 @@ const updateOffer = async (req, res) => {
     }
 };
 
+// Delete Offers
 const deleteOffer = async (req, res) => {
     try {
         const { id } = req.params;
@@ -169,6 +172,8 @@ const deleteOffer = async (req, res) => {
         return res.error("Something went wrong while updating the offer.", 500);
     }
 };
+
+// Admin Get Offers
 const adminGetOffer = async (req, res) => {
     try {
         const offers = await Offer.find();
@@ -183,6 +188,8 @@ const adminGetOffer = async (req, res) => {
         return res.error("Something went wrong while fetching the offer.", 500);
     }
 };
+
+
 module.exports = {
     createOffer,
     updateOffer,

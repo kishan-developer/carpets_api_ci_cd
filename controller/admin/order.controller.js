@@ -2,6 +2,8 @@ const Order = require("../../model/Order.model");
 const Address = require("../../model/Adress.model");
 const mailSender = require("../../utils/mailSender.utils");
 const orderStatusUpdateTemplate = require("../../email/template/orderStatusUpdateTemplate");
+
+// Get Orders 
 const getOrders = async (req, res) => {
     try {
         const orders = await Order.find()
@@ -14,6 +16,7 @@ const getOrders = async (req, res) => {
     }
 };
 
+// Update Order status
 const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
@@ -46,6 +49,7 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
+// Get Order By Id
 const getOrderById = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id)
@@ -64,7 +68,7 @@ const getOrderById = async (req, res) => {
     }
 };
 
-
+// Update Delhivery Receipt
 const updateDelhiveryReceipt = async (req, res) => {
     const {
         delhiveryReceipt,

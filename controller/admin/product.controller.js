@@ -1,10 +1,12 @@
 const asyncHandler = require("express-async-handler");
-const imageUplaoder = require("../../utils/imageUpload.utils");
+const imageUplaoder = require("../../utils/imageUploader.utils");
 const Product = require("../../model/Product.model");
 const Category = require("../../model/Category.model");
 const sanitizePayload = require("../../utils/sanitizePayload");
 const { PRODUCT_ALLOWED_FIELDS } = require("../../constants/constants");
 
+
+// Create Product
 const createProduct = asyncHandler(async (req, res) => {
     const {
         name,
@@ -29,12 +31,10 @@ const createProduct = asyncHandler(async (req, res) => {
         !price ||
         !category ||
         !stock ||
-        !fabric ||
+       
         !technique ||
         !color ||
-        !weight ||
-        !assurance ||
-        !hsnCode ||
+       
         !images
     ) {
         return res.error("All required fields must be filled properly.", 400);
@@ -91,6 +91,7 @@ const createProduct = asyncHandler(async (req, res) => {
     return res.success("Product created successfully.", allProducts);
 });
 
+// Update Product
 const updateProduct = asyncHandler(async (req, res) => {
     const _id = req.params?.id || req.body?.id;
     const payload = req.body;
@@ -149,8 +150,14 @@ const updateProduct = asyncHandler(async (req, res) => {
     return res.success("Product category updated successfully", allProducts);
 });
 
+// delete Product
+// admin/product/delete/
 const deleteProduct = asyncHandler(async (req, res) => {
+
+    console.log("req.params.id",req.params.id)
+
     const _id = req.body?.id || req.params.id;
+
     if (!_id) {
         return res.error("Product ID is required", 400);
     }

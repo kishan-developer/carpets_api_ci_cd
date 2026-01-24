@@ -1,6 +1,7 @@
 const express = require("express");
 const authRoutes = require("../routes/auth.routes");
 const adminRoutes = require("../routes/admin/index.routes");
+
 const {
     getAllProducts,
     getProductById,
@@ -12,7 +13,7 @@ const {
 } = require("../controller/public/product/category.controller");
 
 
-const imageUploader = require("../utils/imageUpload.utils");
+const imageUploader = require("../utils/imageUploader.utils");
 
 const userRoutes = require("./user/index.routes");
 const paymentRoutes = require("./payment.routes");
@@ -46,35 +47,145 @@ router.get("/offer", getOffer);
 router.get("/offer/:productId", getOfferOfProduct);
 
 
+// router.post("/upload", async (req, res) => {
+
+//     console.log("req", req.files.files)
+//     try {
+//         const images = req.files?.files ?? null;
+//         const imageFileName = req.body.name;
+
+//         if (!images) {
+//             return res
+//                 .status(400)
+//                 .json({ success: false, message: "Please upload file first" });
+//         }
+
+//         const imageList = Array.isArray(images) ? images : [images];
+
+//         for (const image of imageList) {
+//             if (image.size > 100 * 1024 * 1024) {
+//                 return res.status(400).json({
+//                     success: false,
+//                     message: "Image should not be larger than 100MB",
+//                 });
+//             }
+//         }
+
+//         const slugFIleName = imageFileName.trim().replace(/\s+/g, "-");
+//         const result = await imageUploader(images, slugFIleName); // now uploads to local folder
+//         return res.status(200).json({
+//             success: true,
+//             message: "Images uploaded successfully",
+//             data: result,
+//         });
+//     } catch (err) {
+//         console.error("Upload error:", err);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Server error",
+//             error: err.message,
+//         });
+//     }
+// });
+
+
+// AWS S3 Photo Upload URL 
+// /api/v1/upload 
+// router.post("/upload", async (req, res) => {
+//     try {
+//         const images = req.files?.files;
+
+//         if (!images) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Please upload file first",
+//             });
+//         }
+
+//         const imageList = Array.isArray(images) ? images : [images];
+
+//         // File size check
+//         for (const image of imageList) {
+//             if (image.size > 100 * 1024 * 1024) {
+//                 return res.status(400).json({
+//                     success: false,
+//                     message: "Image should not be larger than 100MB",
+//                 });
+//             }
+//         }
+
+//         // Use first file's name for slug creation
+//         const imageFileName = Array.isArray(images) ? images[0].name : images.name;
+
+      
+
+//         const slugFileName = imageFileName
+//             .trim()
+//             .replace(/\s+/g, "-")
+//             .replace(/\.[^/.]+$/, ""); // REMOVE existing extension
+
+//         const result = await imageUploader(images, slugFileName);
+
+//         return res.status(200).json({
+//             success: true,
+//             message: "Images uploaded successfully",
+//             data: result,
+//         });
+
+//     } catch (err) {
+//         console.error("Upload error:", err);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Server error",
+//             error: err.message,
+//         });
+//     }
+// });
+
+
+
+
 router.post("/upload", async (req, res) => {
     try {
-        const images = req.files?.files ?? null;
-        const imageFileName = req.body.name;
+        const images = req.files?.files;
 
         if (!images) {
-            return res
-                .status(400)
-                .json({ success: false, message: "Please upload file first" });
+            return res.status(400).json({
+                success: false,
+                message: "Please upload at least one image",
+            });
         }
 
+        // Normalize to array
         const imageList = Array.isArray(images) ? images : [images];
 
+        // File size check
         for (const image of imageList) {
             if (image.size > 100 * 1024 * 1024) {
                 return res.status(400).json({
                     success: false,
-                    message: "Image should not be larger than 100MB",
+                    message: `Image "${image.name}" should not be larger than 100MB`,
                 });
             }
         }
 
-        const slugFIleName = imageFileName.trim().replace(/\s+/g, "-");
-        const result = await imageUploader(images, slugFIleName); // now uploads to local folder
+        // Use first file's name for slug creation
+        const firstFileName = imageList[0].name;
+        const slugFileName = firstFileName
+            .trim()
+            .replace(/\s+/g, "-")
+            .replace(/\.[^/.]+$/, ""); // remove extension
+
+        // Upload images to S3 and get URLs
+        const uploadedUrls = await imageUploader(imageList, slugFileName);
+
+        // uploadedUrls is now an array of URLs like [url1, url2]
         return res.status(200).json({
             success: true,
             message: "Images uploaded successfully",
-            data: result,
+            data: uploadedUrls,
         });
+
     } catch (err) {
         console.error("Upload error:", err);
         return res.status(500).json({

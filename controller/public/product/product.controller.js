@@ -3,7 +3,7 @@ const { client } = require('../../../utils/redisClient');
 
 const asyncHandler = require("express-async-handler");
 
-
+// Get all Products
 const getAllProducts = asyncHandler(async (req, res) => {
     const products = await Product.find({})
         .populate("category")
@@ -19,6 +19,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
     return res.success("Products Fetched Successfully.", products);
 });
 
+// Get ProductBy ID 
 const getProductById = asyncHandler(async (req, res) => {
     const _id = req.body?.id || req.params.id;
     if (!_id) {
@@ -40,6 +41,8 @@ const getProductById = asyncHandler(async (req, res) => {
     return res.success("Product Fetched Successfully", product);
 });
 
+
+// Get Product By Fabric 
 const getProductByfabric = async (req, res) => {
     try {
         console.log(req.params);
@@ -67,4 +70,6 @@ const getProductByfabric = async (req, res) => {
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };
+
+
 module.exports = { getAllProducts, getProductById, getProductByfabric };

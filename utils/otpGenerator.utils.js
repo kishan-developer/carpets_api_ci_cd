@@ -18,7 +18,7 @@ const generateOtp = async () => {
         });
         result = await OTP.findOne({ otp: otp });
     }
-    console.log(otp);
+    // console.log(otp);
     return otp;
 };
 

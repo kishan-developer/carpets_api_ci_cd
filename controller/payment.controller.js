@@ -247,6 +247,7 @@ const adminOrderNotificationTemplate = require("../email/template/adminOrderNoti
 const userOrderConfirmationTemplate = require("../email/template/userOrderConfirmationTemplate");
 
 
+// checkout handler 
 exports.checkoutHandler = async (req, res) => {
     try {
         const { amount, userId, items, addressId, discount = 0 } = req.body;
@@ -297,6 +298,8 @@ exports.checkoutHandler = async (req, res) => {
     }
 };
 
+
+// payment Varification Handler 
 exports.paymentVerificationHandler = async (req, res) => {
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
         req.body;
@@ -446,6 +449,8 @@ exports.paymentVerificationHandler = async (req, res) => {
     }
 };
 
+
+// Update Payment Status 
 exports.updatePaymentStatus = async (req, res) => {
     try {
         const { id } = req.params;

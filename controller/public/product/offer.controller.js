@@ -44,6 +44,8 @@ const isOfferActive = (offer) => {
     );
 };
 
+
+// get Offers
 const getOffer = async (req, res) => {
     try {
         const offers = await Offer.find();
@@ -60,6 +62,8 @@ const getOffer = async (req, res) => {
     }
 };
 
+
+// Get Offers Of Product
 const getOfferOfProduct = async (req, res) => {
     const { productId } = req.params;
 

@@ -1,9 +1,12 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../model/User.model");
-const generateOtp = require("../utils/otpGenerator.utils");
+
 const OTP = require("../model/Otp.model");
 const bcrypt = require("bcryptjs");
+
 const mailSender = require("../utils/mailSender.utils");
+const generateOtp = require("../utils/otpGenerator.utils");
+
 const registrationSuccessTemplate = require("../email/template/registrationSuccessTemplate");
 const getSessionDetails = require("../utils/getSessionDetails");
 const loginAlertTemplate = require("../email/template/loginAlertTemplate");
@@ -13,6 +16,8 @@ const jwt = require("jsonwebtoken");
 const passwordChangeSuccessTemplate = require("../email/template/passwordChangeSuccessTemplate");
 require("dotenv").config();
 
+
+// Generate Token And Referesh Tokens
 const generateTokenAndRefereshTokens = asyncHandler(async (userId) => {
     const user = await User.findById(userId);
     const token = user.generateToken();
@@ -23,38 +28,147 @@ const generateTokenAndRefereshTokens = asyncHandler(async (userId) => {
     return { token, refreshToken };
 });
 
-exports.sendOtp = asyncHandler(async (req, res) => {
-    // get email
-    const { email } = req.body;
-    // check is Email Have Or Not if have then go forward or return errr;
-    if (!email) {
-        return res.error("Email is required", 401);
-    }
-    // check is user already exit or not if user already exit then return error otherwise go forward
-    const isUserAlreadyExit = await User.findOne({ email });
-    if (isUserAlreadyExit) {
-        return res.error("User Already Exit", 401);
-    }
-    // genrate unique OTP
-    let otp = await generateOtp();
+// // Send OTP
+// exports.sendOtp = asyncHandler(async (req, res) => {
+    
+//     // get email
+//     const { email } = req.body;
 
-    // Save OTP In Database With Email And Send Response SuccessFull..
-    const otpPayload = { otp, email };
-    // Delete All Otp Before Saving New Otp
+//     console.log("Email Id", email)
+//     // check is Email Have Or Not if have then go forward or return errr;
+//     if (!email) {
+//         return res.error("Email is required", 401);
+//     }
+//     // check is user already exit or not if user already exit then return error otherwise go forward
+//     const isUserAlreadyExit = await User.findOne({ email });
+
+//     console.log("users", isUserAlreadyExit)
+
+//     if (isUserAlreadyExit) {
+//         return res.error("User Already Exit", 401);
+//     }
+//     // genrate unique OTP
+//     let otp = await generateOtp();
+
+//     console.log("OTP", otp)
+
+//     // Save OTP In Database With Email And Send Response SuccessFull..
+//     const otpPayload = { otp, email };
+//     // Delete All Otp Before Saving New Otp
+//     await OTP.deleteMany({ email });
+//     const newOtp = await OTP.create(otpPayload);
+//     return res.success("Otp Generated Successfully", newOtp);
+// });
+
+// Send OTP
+// exports.sendOtp = asyncHandler(async (req, res) => {
+
+//     const { email } = req.body;
+
+//     if (!email) {
+//         return res.error("Email is required", 400);
+//     }
+
+//     // Check user exists
+//     const isUserAlreadyExists = await User.findOne({ email });
+//     if (isUserAlreadyExists) {
+//         return res.error("User Already Exists", 400);
+//     }
+
+//     // Generate OTP
+//     const otp = await generateOtp();   // OR await if async
+//     console.log("Generated OTP:", otp);
+
+//     // Save OTP in DB
+//     await OTP.deleteMany({ email });
+//     const newOtp = await OTP.create({ email, otp });
+
+//     /* ---------------- EMAIL CONFIGURATION ---------------- */
+
+//     const transporter = nodemailer.createTransport({
+//         service: "gmail",
+//         auth: {
+//             user: process.env.SMTP_USER,  // your gmail
+//             pass: process.env.SMTP_PASS,  // APP PASSWORD only
+//         },
+//     });
+
+//     const mailOptions = {
+//         from: process.env.SMTP_USER,
+//         to: email,
+//         subject: "Your OTP for Registration",
+//         html: `
+//             <h2>Verification OTP</h2>
+//             <p>Your OTP is: <b>${otp}</b></p>
+//             <p>It will expire in 10 minutes.</p>
+//         `,
+//     };
+
+//     try {
+//         await transporter.mailSender(mailOptions);
+//         console.log("OTP Email Sent Successfully!");
+
+//         return res.success("OTP sent successfully", {
+//             email,
+//         });
+
+//     } catch (error) {
+//         console.log("Email Error:", error);
+//         return res.error("Failed to send OTP email", 500);
+//     }
+// });
+
+// Send OTP Working 
+exports.sendOtp = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.error("Email is required", 400);
+    }
+
+    const isUserAlreadyExists = await User.findOne({ email });
+    
+    if (isUserAlreadyExists) {
+        return res.error("User Already Exists", 400);
+    }
+
+    const otp = await generateOtp();
+    console.log("Generated OTP:", otp);
+
     await OTP.deleteMany({ email });
-    const newOtp = await OTP.create(otpPayload);
-    return res.success("Otp Generated Successfully", newOtp);
+    await OTP.create({ email, otp });
+
+    try {
+        await mailSender(
+            email,
+            "Your OTP for Registration",
+            `
+                <h2>Verification OTP</h2>
+                <p>Your OTP is: <b>${otp}</b></p>
+                <p>It will expire in 10 minutes.</p>
+            `
+        );
+
+        return res.success("OTP sent successfully", { email });
+
+    } catch (error) {
+        console.log("Email Error:", error);
+        return res.error("Failed to send OTP email", 500);
+    }
 });
+
 
 // Controller function to handle user registration
 exports.registerUser = asyncHandler(async (req, res) => {
+
     // Destructure fields from request body
     const { phone, password, confirmPassword, otp } = req.body;
-    const name = req.body.name?.trim();
+
     const email = req.body.email?.trim().toLowerCase();
     const firstName = req.body.firstName.trim().toLowerCase();
     const lastName = req.body.lastName.trim().toLowerCase();
     // 400 Bad Request – Missing required fields
+
     if (
         !firstName ||
         !lastName ||
@@ -83,7 +197,7 @@ exports.registerUser = asyncHandler(async (req, res) => {
 
     if (!otpRecord) {
         return res.error(
-            "OTP record not found (expired or never generated)",
+            "OTP recondrd not fou (expired or never generated)",
             404
         );
     }
@@ -102,22 +216,18 @@ exports.registerUser = asyncHandler(async (req, res) => {
         password,
     };
 
+    console.log("userpayload", userPayload);
     // Save new user
     const newUser = await User.create(userPayload);
     // newUser.save();
     // Send registration success email
-    await mailSender(
-        newUser.email,
-        "Welcome to Himalaya Carpets – Your Registration is Complete!",
-        registrationSuccessTemplate(`${newUser.firstName} ${newUser.lastName}`)
-    );
-
+ 
     // 201 Created – Resource successfully created
     return res.success("User created successfully.", newUser);
 });
 
-// User Login Handler
 
+// User Login Handler
 exports.login = asyncHandler(async (req, res) => {
     console.log("req.body", req.body);
 
@@ -169,8 +279,8 @@ exports.login = asyncHandler(async (req, res) => {
     delete userData.refreshToken;
     // const options = {
     //     httpOnly: true,
-    //     secure: false, // ✅ for localhost
-    //     sameSite: "Lax", // ✅ for localhost
+    //     secure: false, //  for localhost
+    //     sameSite: "Lax", //  for localhost
     // };
 
     const isProduction = process.env.NODE_ENV === "production";
@@ -193,6 +303,7 @@ exports.login = asyncHandler(async (req, res) => {
         token,
     });
 });
+
 
 // Handler FOr Handle Change Password From Profile Of User After Login
 exports.changePassword = asyncHandler(async (req, res) => {
@@ -251,6 +362,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
     return res.success("Password Changed Successfully", userDetails);
 });
 
+
 // Controller For handle Token Generation For Password Reset ->
 exports.forgotPasswordToken = asyncHandler(async (req, res) => {
     // get user email find them
@@ -281,6 +393,7 @@ exports.forgotPasswordToken = asyncHandler(async (req, res) => {
     return res.success("Reset link sent! Check your email.");
     // send success response to admin
 });
+
 
 // Forgot Password Handler For Handle Password Change By Token
 exports.forgotPassword = asyncHandler(async (req, res) => {
@@ -348,35 +461,7 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
     return res.success("Password Changed Successfully.");
 });
 
-// exports.logoutUser = async (req, res) => {
-//     try {
-//         console.log('Logout Api ->', req.user)
-//         await User.findByIdAndUpdate(
-//             req.user._id,
-//             {
-//                 $unset: {
-//                     refreshToken: 1, // this removes the field from document
-//                 },
-//             },
-//             {
-//                 new: true,
-//             }
-//         );
-
-//         const options = {
-//             httpOnly: true,
-//             secure: true,
-//         };
-
-//         res.clearCookie("token", options).clearCookie("refreshToken", options);
-//         return res.success("User logged Out");
-//     } catch (error) {
-//         console.log('Error While Logout', error)
-//         return res.status(500).json({
-//             error
-//         })
-//     }
-// };
+// Logout User
 exports.logoutUser = async (req, res) => {
     try {
         const refreshToken = req.cookies?.refreshToken;
@@ -401,6 +486,8 @@ exports.logoutUser = async (req, res) => {
     }
 };
 
+
+// Regenerate Token 
 exports.regenerateToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req?.cookies?.refreshToken;
     console.log("Refresh token ->", incomingRefreshToken);
@@ -440,6 +527,8 @@ exports.regenerateToken = asyncHandler(async (req, res) => {
     }
 });
 
+
+// Get User Details 
 exports.getUserDetails = asyncHandler(async (req, res) => {
     const userId = req?.user?._id || req.body.userId;
     if (!userId) {
@@ -455,6 +544,8 @@ exports.getUserDetails = asyncHandler(async (req, res) => {
     return res.success("User Fetched Successfully..", userDetails);
 });
 
+
+// Reset Pass Validate Token
 exports.resetPassValidateToken = asyncHandler(async (req, res) => {
     const { token } = req.params;
 

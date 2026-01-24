@@ -4,6 +4,8 @@ const Category = require("../../model/Category.model");
 const Payment = require("../../model/Payment.model");
 const User = require("../../model/User.model");
 const Review = require("../../model/Review.model");
+
+// Get Overview Page Details
 const getOverview = async (req, res) => {
     try {
         // 1) lowStockProducts: products with stock <= 5

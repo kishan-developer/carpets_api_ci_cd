@@ -21,52 +21,58 @@ connectDB();
 // Initialize app
 const app = express();
 
-// Middlewares
+/* -------------------- CORS FIX (Express 5 Compatible) -------------------- */
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://thehimalayacarpets.online",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+// Preflight Request Fix (Express 5 requires '(.*)' instead of '*')
+// app.options("(.*)", cors());
+
+/* -------------------- Other Middlewares -------------------- */
+
 app.use(compression());
 app.use(cookieParser());
 app.use(express.json());
+
 app.use(
   express.urlencoded({
     extended: true,
   })
 );
 
-
-// Serve static files from /root/uploads/image/products
-app.use("/images/products", express.static("/root/uploads/image/products"));
-
-// Serve images from /root/uploads/image at /images URL
-// app.use("/images", express.static("/root/uploads/image"));
-
-// CORS settings
-const allowedOrigins = [
-  "https://thehimalayacarpets.online"
-];
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
-
-
 // Security headers
 app.use(helmet());
 
 // File upload
-app.use(
-  fileUpload({
+// app.use(
+//   fileUpload({
+//     useTempFiles: true,
+//     tempFileDir: "/tmp",
+//   })
+// );
+app.use(fileUpload({
     useTempFiles: true,
-    tempFileDir: "/tmp",
-  })
-);
+    tempFileDir: "/tmp/",   // important for Linux servers
+    limits: { fileSize: 100 * 1024 * 1024 }
+}));
+
+
 
 // Custom response handler
 app.use(sendCustomResponse);
@@ -76,12 +82,11 @@ app.use("/api/v1", router);
 
 // Default route
 app.get("/home", (req, res) => {
-  res.send("Himalya Server Live....1");
+  res.send("Himalya Server Live....");
 });
 
-
-
-
+// Serve static files
+app.use("/images/products", express.static("/root/uploads/image/products"));
 
 // 404 handler
 app.use(notFound);
@@ -89,8 +94,10 @@ app.use(notFound);
 // Global error handler
 app.use(globalErrorHandler);
 
-// Start server
-const PORT = process.env.PORT || 5679;
+/* -------------------- Server Start -------------------- */
+
+const PORT = process.env.PORT || 5003;
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -14,6 +14,7 @@ userRoutes.use("/orders", isAuthenticated, orderRouter);
 userRoutes.use("/address", isAuthenticated, addressRouter);
 userRoutes.use("/review", isAuthenticated, reviewRouter);
 userRoutes.use("/coupon", couponRouter);
+
 userRoutes.put('/update-profile', isAuthenticated, async (req, res) => {
     try {
         const userId = req.user._id; // Get the user ID from the JWT payload
@@ -58,4 +59,5 @@ userRoutes.put('/update-profile', isAuthenticated, async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error occurred while updating profile.' });
     }
 });
+
 module.exports = userRoutes;

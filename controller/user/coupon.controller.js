@@ -1,5 +1,7 @@
 const Coupon = require("../../model/Coupon.model");
 const Order = require('../../model/Order.model')
+
+//
 const applyCoupon = async (req, res) => {
     const { couponCode, user_id } = req.body;
 
