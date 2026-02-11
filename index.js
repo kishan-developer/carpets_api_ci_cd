@@ -25,7 +25,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://thehimalayacarpets.online",
+  "https://thehimalayacarpets.in",
 ];
 
 app.use(
@@ -81,7 +81,7 @@ app.use(sendCustomResponse);
 app.use("/api/v1", router);
 
 // Default route
-app.get("/home", (req, res) => {
+app.get("/", (req, res) => {
   res.send("Himalya Server Live....");
 });
 
@@ -96,7 +96,7 @@ app.use(globalErrorHandler);
 
 /* -------------------- Server Start -------------------- */
 
-const PORT = process.env.PORT || 5003;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
