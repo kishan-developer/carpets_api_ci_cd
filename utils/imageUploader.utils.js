@@ -1,8 +1,7 @@
 
-
-
 const fs = require("fs");
 const path = require("path");
+const { PutObjectCommand } = require("@aws-sdk/client-s3");
 const s3 = require("../config/awsConfig");
 
 const imageUploader = async (images, slugFileName) => {
@@ -13,7 +12,6 @@ const imageUploader = async (images, slugFileName) => {
         const ext = path.extname(image.name);
         const finalName = `${slugFileName}-${Date.now()}${ext}`;
 
-        // Read file from tempFilePath
         const fileBuffer = fs.readFileSync(image.tempFilePath);
 
         const params = {
@@ -21,19 +19,58 @@ const imageUploader = async (images, slugFileName) => {
             Key: finalName,
             Body: fileBuffer,
             ContentType: image.mimetype,
-            // ACL: "public-read", // make file public
         };
 
-        const result = await s3.upload(params).promise();
+        // Use PutObjectCommand for AWS v3
+        const command = new PutObjectCommand(params);
+        await s3.send(command);
 
-        // Only push URL
-        uploadedUrls.push(result.Location);
+        const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${finalName}`;
+        uploadedUrls.push(fileUrl);
     }
 
     return uploadedUrls;
 };
 
 module.exports = imageUploader;
+
+
+
+
+
+// const fs = require("fs");
+// const path = require("path");
+// const s3 = require("../config/awsConfig");
+
+// const imageUploader = async (images, slugFileName) => {
+//     const list = Array.isArray(images) ? images : [images];
+//     const uploadedUrls = [];
+
+//     for (const image of list) {
+//         const ext = path.extname(image.name);
+//         const finalName = `${slugFileName}-${Date.now()}${ext}`;
+
+//         // Read file from tempFilePath
+//         const fileBuffer = fs.readFileSync(image.tempFilePath);
+
+//         const params = {
+//             Bucket: process.env.AWS_BUCKET_NAME,
+//             Key: finalName,
+//             Body: fileBuffer,
+//             ContentType: image.mimetype,
+//             // ACL: "public-read", // make file public
+//         };
+
+//         const result = await s3.upload(params).promise();
+
+//         // Only push URL
+//         uploadedUrls.push(result.Location);
+//     }
+
+//     return uploadedUrls;
+// };
+
+// module.exports = imageUploader;
 
 
 
@@ -75,6 +112,7 @@ module.exports = imageUploader;
 // };
 
 // module.exports = imageUploader;
+
 
 
 
