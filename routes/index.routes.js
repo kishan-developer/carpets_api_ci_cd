@@ -47,6 +47,58 @@ router.get("/offer", getOffer);
 router.get("/offer/:productId", getOfferOfProduct);
 
 
+// router.post("/upload", async (req, res) => {
+//     try {
+//         const images = req.files?.files;
+
+//         if (!images) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Please upload at least one image",
+//             });
+//         }
+
+//         // Normalize to array
+//         const imageList = Array.isArray(images) ? images : [images];
+
+//         // File size check
+//         for (const image of imageList) {
+//             if (image.size > 100 * 1024 * 1024) {
+//                 return res.status(400).json({
+//                     success: false,
+//                     message: `Image "${image.name}" should not be larger than 100MB`,
+//                 });
+//             }
+//         }
+
+//         // Use first file's name for slug creation
+//         const firstFileName = imageList[0].name;
+//         const slugFileName = firstFileName
+//             .trim()
+//             .replace(/\s+/g, "-")
+//             .replace(/\.[^/.]+$/, ""); // remove extension
+
+//         // Upload images to S3 and get URLs
+//         const uploadedUrls = await imageUploader(imageList, slugFileName);
+
+//         // uploadedUrls is now an array of URLs like [url1, url2]
+//         return res.status(200).json({
+//             success: true,
+//             message: "Images uploaded successfully",
+//             data: uploadedUrls,
+//         });
+
+//     } catch (err) {
+//         console.error("Upload error:", err);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Server error",
+//             error: err.message,
+//         });
+//     }
+// });
+
+
 router.post("/upload", async (req, res) => {
     try {
         const images = req.files?.files;
@@ -97,7 +149,6 @@ router.post("/upload", async (req, res) => {
         });
     }
 });
-
 
 router.post("/bookVideoCall", async (req, res) => {
     const { email, body } = req.body;
@@ -330,3 +381,4 @@ router.post("/custom-rug-request", async (req, res) => {
 });
 
 module.exports = router;
+
