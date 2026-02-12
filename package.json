@@ -9,14 +9,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Krishnarajbhar767/shreejan-fab-backend.git"
+        "url": ""
     },
     "author": "Media FleetBlue",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/Krishnarajbhar767/shreejan-fab-backend/issues"
+        "url": ""
     },
-    "homepage": "https://github.com/Krishnarajbhar767/shreejan-fab-backend#readme",
+    "homepage": "",
     "description": "",
     "dependencies": {
         "@aws-sdk/client-s3": "^3.985.0",
@@ -47,3 +47,4 @@
         "ua-parser-js": "^2.0.3"
     }
 }
+
